@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  email       String    @unique
+  password    String
+  name        String
+  role        Role      @default(PATIENT)
+  nik         String?
+  bpjs        String?
+  phone       String?
+  address     String?   @db.Text
+  birthDate   DateTime?
+  gender      Gender?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  examinationsAsPatient  Examination[] @relation("PatientExaminations")
+  examinationsAsAdmin    Examination[] @relation("AdminExaminations")
+  medicalNotesAsPatient  MedicalNote[] @relation("PatientNotes")
+  medicalNotesAsDoctor   MedicalNote[] @relation("DoctorNotes")
+  sentMessages           ChatMessage[] @relation("SentMessages")
+  receivedMessages       ChatMessage[] @relation("ReceivedMessages")
+  prescriptionsAsPatient Prescription[] @relation("PatientPrescriptions")
+  prescriptionsAsDoctor  Prescription[] @relation("DoctorPrescriptions")
+}
+
+model LabParameter {
+  id             Int       @id @default(autoincrement())
+  code           String    @unique
+  name           String
+  unit           String
+  normalMin      Float?    // Default/fallback
+  normalMax      Float?    // Default/fallback
+  attentionMin   Float?    // Batas bawah "Perhatian"
+  attentionMax   Float?    // Batas atas "Perhatian"
+  actionMin      Float?    // Batas bawah "Perlu Tindakan"
+  actionMax      Float?    // Batas atas "Perlu Tindakan"
+  normalMinMale  Float?    // Male-specific
+  normalMaxMale  Float?    // Male-specific
+  normalMinFemale Float?   // Female-specific
+  normalMaxFemale Float?   // Female-specific
+  inputType      InputType @default(NUMBER)
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Examination {
+  id          Int       @id @default(autoincrement())
+  patientId   Int
+  adminId     Int
+  results     Json      // Dynamic lab results
+  status      ExamStatus @default(PENDING)
+  validatedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  patient     User      @relation("PatientExaminations", fields: [patientId], references: [id])
+  admin       User      @relation("AdminExaminations", fields: [adminId], references: [id])
+}
+
+model MedicalNote {
+  id          Int       @id @default(autoincrement())
+  patientId   Int
+  doctorId    Int
+  diagnosis   String    @db.Text
+  education   String?   @db.Text
+  followUp    String?   @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  patient     User      @relation("PatientNotes", fields: [patientId], references: [id])
+  doctor      User      @relation("DoctorNotes", fields: [doctorId], references: [id])
+}
+
+model ChatMessage {
+  id          Int       @id @default(autoincrement())
+  senderId    Int
+  receiverId  Int
+  message     String    @db.Text
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  sender      User      @relation("SentMessages", fields: [senderId], references: [id])
+  receiver    User      @relation("ReceivedMessages", fields: [receiverId], references: [id])
+}
+
+model Prescription {
+  id           Int       @id @default(autoincrement())
+  patientId    Int
+  doctorId     Int
+  medication   String    @db.Text
+  dosage       String
+  instructions String?   @db.Text
+  notes        String?   @db.Text
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  patient      User      @relation("PatientPrescriptions", fields: [patientId], references: [id])
+  doctor       User      @relation("DoctorPrescriptions", fields: [doctorId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+  PATIENT
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum InputType {
+  NUMBER
+  TEXT
+}
+
+enum ExamStatus {
+  PENDING
+  VALID
+}
