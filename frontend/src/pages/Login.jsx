@@ -97,24 +97,7 @@ export default function Login() {
                         </button>
                     </form>
 
-                    {/* Demo accounts */}
-                    <div className="mt-6 pt-6 border-t border-gray-100">
-                        <p className="text-sm text-gray-500 text-center mb-3">Akun Demo:</p>
-                        <div className="space-y-2 text-xs text-gray-600">
-                            <div className="flex justify-between p-2 bg-gray-50 rounded-lg">
-                                <span className="font-medium">Admin:</span>
-                                <span>admin@health.com / admin123</span>
-                            </div>
-                            <div className="flex justify-between p-2 bg-gray-50 rounded-lg">
-                                <span className="font-medium">Dokter:</span>
-                                <span>dokter@health.com / dokter123</span>
-                            </div>
-                            <div className="flex justify-between p-2 bg-gray-50 rounded-lg">
-                                <span className="font-medium">Pasien:</span>
-                                <span>budi@health.com / pasien123</span>
-                            </div>
-                        </div>
-                    </div>
+
                 </div>
             </div>
         </div>
